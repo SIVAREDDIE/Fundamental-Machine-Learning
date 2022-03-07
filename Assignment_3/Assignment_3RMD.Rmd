@@ -1,0 +1,113 @@
+---
+title: "Assignment_3"
+author: "SIVAREDDY"
+date: "06/03/2022"
+output: pdf_document
+---
+
+```{r}
+library(readr)
+UniversalBank <- read_csv("Siva/UniversalBank.csv")
+```
+```{r}
+library(readr)
+library(caret)
+library(ISLR)
+library(class)
+View(UniversalBank)
+DF= UniversalBank 
+DF$Online_category='Not-Active'
+DF$Online_category[DF$Online>0]= 'Active'
+DF$Online_category=as.factor(DF$Online_category)
+DF$CreditCard=as.factor(DF$CreditCard )
+DF$PersonalLoan=as.factor(DF$PersonalLoan)
+
+summary(DF)
+```
+Task-A 
+
+#Partition of the data 60 and 40
+#we have created the pivot table for the training data with online as a column variable, Creditcard as a row variable, and personal loan as a secondary row variable. The values inside the table should convey the count.
+
+#We have used the xtabs and ftable functions.
+
+```{r}
+set.seed(64060)
+Train_Index = createDataPartition(DF$PersonalLoan,p=0.6, list=FALSE)
+Train.df=DF[Train_Index,]
+Validation.df=DF[-Train_Index,]
+
+mytable <- xtabs(~ Online_category+CreditCard+PersonalLoan, data=Train.df)
+ftable(mytable)
+
+```
+Task-B
+
+##The probability of loan acceptance (Loan = 1) conditional on having a bank credit card (CC = 1) and being an active user of online banking services (Online = 1)] is 59/(59+479) = 0.10966 OR 11%
+
+Task - C
+#we have created the pivot table for the training data  one will have Creditcard (rows) as a the function of  PersonalLoan (columns) and the other will have Online_category (rows) and PersonalLoan (columns)
+
+```{r}
+table(Creditcard =Train.df$CreditCard, PersonalLoan =Train.df$PersonalLoan) 
+
+table(Online_category =Train.df$Online_category, PersonalLoan =Train.df$PersonalLoan)
+
+```
+Task-D
+
+#i. P(CC = 1 | Loan = 1) (the proportion of credit card holders among the loan acceptors) Ans. 93/(93+195) = 0.323 in otherwords 32.3%
+
+#ii. P(Online = 1 | Loan = 1)  Ans.179/(179+109)= 62.51%
+
+#iii.P(Loan = 1) (the proportion of loan acceptors) Ans. 195+93/(195+93+1924+788)= 0.096 or in otherwords 9.6%
+
+#iv. P(CC = 1 | Loan = 0)  Ans.788/(1924+788)= 0.2905 or 29.05%
+
+#v. P(Online = 1 | Loan = 0) Ans.1631/(1631+1081)=0.6014 or 60.14%
+
+#vi. P(Loan = 0) Ans.1924+788/(1924+788+195+93)=0.904 or 90.4%
+
+Task-E
+
+#Use the quantities computed above to compute the naive Bayes probability P(Loan = 1 | CC = 1, Online = 1). 
+
+#formula
+P(Y/x1...Xn) = (P(X1......Xn/Y)/P(X1,....Xn))
+X1=Online
+X2=Creditcard
+Y=PersonalLoan
+      
+ P(creditcard) =0.60333
+ P(Online)     =0.2936662
+ 
+              = = 0.6251*0.323*0.096/0.60333*0.2936662=0.105598 or 10.55%
+              
+#TASK-F
+
+#Both normal method (10.96%) and Naive Bayes method values (10.55%) are very similar. The main difference between normal method and Naive Bayes is Normal method need exact same independent variable classification to predict, But not in the case Naive Bayes method.
+
+TASK-G
+
+```{r}
+library(e1071)
+
+nb.model<-naiveBayes (PersonalLoan~Online_category+CreditCard, data=Train.df) 
+To_Predict=data.frame(CreditCard ='1',Online_category ='1') 
+predict(nb.model,To_Predict,type='raw')
+
+```
+we have received same output in the previous method which is 10.6% or0.106 the same answer already provided in the above Task
+
+
+
+ 
+ 
+               
+
+
+
+
+
+
+
