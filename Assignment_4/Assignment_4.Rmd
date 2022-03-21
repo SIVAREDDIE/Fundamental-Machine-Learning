@@ -1,0 +1,75 @@
+---
+title: "Assignment_4"
+author: "SIVAREDDY"
+date: '2022-03-20'
+output:
+  word_document: default
+  pdf_document: default
+---
+
+
+```{r}
+getwd()
+library(readr)
+Pharmaceuticals <- read_csv("C:/Users/sivap/OneDrive/Desktop/Pharmaceuticals.csv")
+View(Pharmaceuticals)
+head(Pharmaceuticals)
+```
+
+```{r}
+Numericalvariables <- Pharmaceuticals [,3:11]
+head(Numericalvariables)
+```
+
+```{r}
+library(cluster)
+library(ggplot2)
+library(gridExtra)
+
+scaling_Numericalvariables <- scale (Numericalvariables)
+head(scaling_Numericalvariables)
+
+```
+
+
+
+
+```{r}
+Clusters <- (nrow(scaling_Numericalvariables)-1)*sum(apply(scaling_Numericalvariables,2,var))
+Clusters
+```
+
+```{r}
+for (i in 2:15) Clusters[i] <- sum(kmeans(scaling_Numericalvariables,centers=i)$withinss)
+Clusters
+```
+
+
+
+```{r}
+ #K-Means Cluster Analysis - Fit the data with 5 clusters
+
+fit <- kmeans(scaling_Numericalvariables, 5)
+aggregate(scaling_Numericalvariables,by=list(fit$cluster),FUN=mean)
+
+Cluster_Number<- data.frame(scaling_Numericalvariables, fit$cluster)
+
+Cluster_Number
+```
+
+
+
+
+
+```{r}
+plot(1:15, Clusters, type="b", xlab="Number of Clusters",ylab="Within groups sum of squares")
+```
+
+
+
+
+```{r}
+library(cluster)
+clusplot(Cluster_Number, fit$cluster, color=TRUE, shade=TRUE, labels=2, lines=0)
+
+```
