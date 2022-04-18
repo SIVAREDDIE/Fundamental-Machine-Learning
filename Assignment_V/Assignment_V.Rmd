@@ -1,0 +1,160 @@
+---
+title: "Assignment_V"
+author: "SIVAREDDY"
+date: '2022-04-14'
+output: word_document
+---
+```{r}
+library(readr)
+cereals <- read_csv("C:/Users/sivap/OneDrive/Desktop/Cereals.csv")
+Data_numerical <- data.frame(cereals[,4:16])
+
+```
+Libraries
+
+```{r}
+library(cluster)
+library(caret)
+library(dendextend)
+library(factoextra)
+```
+
+Data Preprocessing. Remove all cereals with missing values. 
+
+Removing missing values in present data
+
+```{r}
+
+missingvalues_removed <- na.omit(Data_numerical)
+
+```
+
+ Data Normalization & Data Scaling:
+
+
+```{r}
+Normalise <- scale(missingvalues_removed)
+```
+ euclidean distance to measure the distance:
+ 
+```{r}
+
+d <- dist(Normalise, method = "euclidean")
+
+```
+ 
+```{r}
+
+##Perform Hierarchical Clustering using complete linkage.
+HC <- hclust(d, method = "complete")
+plot(HC)
+```
+```{r}
+round(HC$height, 3)
+```
+Determining Optimal Clusters:
+
+We can also use agnes() function to perform clustering.
+Performing clustering using agnes() with single, complete, average and ward.
+
+```{r}
+HCsingle <- agnes(Normalise, method = "single")
+HCcomplete <- agnes(Normalise, method = "complete")
+HCaverage <- agnes(Normalise, method = "average")
+HCward <- agnes(Normalise, method = "ward")
+
+#Now we will compare the agglomerative coefficients for Single,complete, average and ward.
+
+print(HCsingle$ac)
+print(HCcomplete$ac)
+print(HCaverage$ac)
+print(HCward$ac)
+```
+The results say that the wards method is the best with the value of 0.904. Plotting the agnes using ward method and Cutting the Dendrogram. We will take k = 5 by observing the distance.
+
+```{r}
+
+pltree(HCward, cex = 0.6, hang = -1, main = "Dendrogram of agnes-Ward")
+
+```
+
+```{r}
+
+# Hierarchical clustering using ward method.
+HC1 <- hclust(d, method = "ward.D2" )
+
+plot(HC1,cex=0.6)
+
+plot(HCward)
+
+rect.hclust(HCward, k=5, border = 2:10)
+
+subgrp <- cutree(HC1, k = 5)
+table(subgrp)
+dataframe <- as.data.frame(cbind(Normalise,subgrp))
+```
+```{r}
+##To visualiZe the results in scatter plot.
+fviz_cluster(list(data = Normalise, cluster = subgrp))
+```
+
+Selecting the cluster that is best cereal for breakfast, which will have high protein, fiber and
+low in sugar, sodium.
+Choosing the Cluster of Healthy Cereals.
+
+```{r}
+
+Newdatacereals <- cereals
+Newdatacereals_omission <- na.omit(Newdatacereals)
+Clust <- cbind(Newdatacereals_omission, subgrp)
+Clust[Clust$subgrp==1,]
+
+```
+```{r}
+Clust[Clust$subgrp==2,]
+```
+```{r}
+Clust[Clust$subgrp==3,]
+```
+```{r}
+Clust[Clust$subgrp==4,]
+```
+
+```{r}
+Clust[Clust$subgrp==5,]
+
+```
+
+
+
+Calculating mean ratings to determine the best cluster.
+```{r}
+
+mean(Clust[Clust$subgrp==1,"rating"])
+
+
+```
+
+
+```{r}
+mean(Clust[Clust$subgrp==2,"rating"])
+
+```
+
+```{r}
+mean(Clust[Clust$subgrp==3,"rating"])
+
+```
+```{r}
+mean(Clust[Clust$subgrp==4,"rating"])
+
+```
+```{r}
+mean(Clust[Clust$subgrp==5,"rating"])
+
+```
+
+
+
+As we can see that the mean ratings for the subgrp==1 is the highest(73.84), it’s the best
+option to choose cluster 1 and the cereals in the cluster 1 for healthy diet.
